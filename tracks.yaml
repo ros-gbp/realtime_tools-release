@@ -13,7 +13,7 @@ tracks:
     name: upstream
     patches: null
     release_inc: '0'
-    release_repo_url: git@github.com:ros-controls/realtime_tools.git
+    release_repo_url: git@github.com:ros-gbp/realtime_tools-release.git
     release_tag: :{version}
     ros_distro: hydro
     vcs_type: git
