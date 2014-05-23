@@ -35,8 +35,8 @@
  *
  * Author: Stuart Glaser
  */
-#ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
-#define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
+#ifndef REALTIME_PUBLISHER_H
+#define REALTIME_PUBLISHER_H
 
 #include <string>
 #include <ros/node_handle.h>
