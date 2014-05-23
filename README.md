@@ -1,3 +1,22 @@
+## realtime_tools (indigo) - 1.9.0-1
+
+The packages in the `realtime_tools` repository were released into the `indigo` distro by running `/usr/bin/bloom-release realtime_tools -t indigo -r indigo` on `Fri, 23 May 2014 12:54:40 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+- rosdistro version: `1.9.0-0`
+- old version: `1.9.0-0`
+- new version: `1.9.0-1`
+
+Versions of tools used:
+- bloom version: `0.5.9`
+- catkin_pkg version: `0.2.2`
+- rosdep version: `0.10.25`
+- rosdistro version: `0.3.5`
+- vcstools version: `0.1.33`
+
+
 ## realtime_tools (hydro) - 1.8.3-1
 
 The packages in the `realtime_tools` repository were released into the `hydro` distro by running `/usr/bin/bloom-release realtime_tools -t hydro -r hydro` on `Fri, 23 May 2014 12:50:39 -0000`
