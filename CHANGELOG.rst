@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.1 (2015-04-30)
+------------------
+* RealtimeBox: Fix member doc
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Dave Coleman
+
 1.9.0 (2014-05-12)
 ------------------
 * Remove rosbuild artifacts.
