@@ -1,3 +1,24 @@
+## realtime_tools (jade) - 1.9.1-0
+
+The packages in the `realtime_tools` repository were released into the `jade` distro by running `/usr/bin/bloom-release realtime_tools --track jade --rosdistro jade --edit` on `Thu, 30 Apr 2015 09:12:32 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `1.9.1-0`
+
+Versions of tools used:
+- bloom version: `0.5.19`
+- catkin_pkg version: `0.2.8`
+- rosdep version: `0.11.0`
+- rosdistro version: `0.4.0`
+- vcstools version: `0.1.33`
+
+
 ## realtime_tools (indigo) - 1.9.1-0
 
 The packages in the `realtime_tools` repository were released into the `indigo` distro by running `/usr/bin/bloom-release realtime_tools --track indigo --rosdistro indigo` on `Thu, 30 Apr 2015 09:09:27 -0000`
