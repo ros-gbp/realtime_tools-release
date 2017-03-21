@@ -1,3 +1,26 @@
+## realtime_tools (lunar) - 1.9.2-0
+
+The packages in the `realtime_tools` repository were released into the `lunar` distro by running `/usr/bin/bloom-release --rosdistro lunar --track lunar realtime_tools --edit` on `Tue, 21 Mar 2017 14:24:49 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `1.9.2-0`
+
+Versions of tools used:
+
+- bloom version: `0.5.25`
+- catkin_pkg version: `0.3.1`
+- rosdep version: `0.11.5`
+- rosdistro version: `0.5.0`
+- vcstools version: `0.1.39`
+
+
 ## realtime_tools (kinetic) - 1.9.2-0
 
 The packages in the `realtime_tools` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release --rosdistro kinetic --track kinetic realtime_tools --edit` on `Mon, 23 May 2016 00:49:14 -0000`
