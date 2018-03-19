@@ -1,3 +1,26 @@
+## realtime_tools (melodic) - 1.11.0-0
+
+The packages in the `realtime_tools` repository were released into the `melodic` distro by running `/usr/bin/bloom-release --rosdistro melodic --track melodic realtime_tools --edit` on `Mon, 19 Mar 2018 21:32:43 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `1.11.0-0`
+
+Versions of tools used:
+
+- bloom version: `0.6.3`
+- catkin_pkg version: `0.4.1`
+- rosdep version: `0.11.8`
+- rosdistro version: `0.6.6`
+- vcstools version: `0.1.40`
+
+
 ## realtime_tools (lunar) - 1.11.0-0
 
 The packages in the `realtime_tools` repository were released into the `lunar` distro by running `/usr/bin/bloom-release realtime_tools --track lunar --rosdistro lunar` on `Mon, 06 Nov 2017 11:04:45 -0000`
