@@ -2,12 +2,19 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.11.1 (2019-02-11)
+1.13.0 (2019-02-11)
 -------------------
-* -- No functionality changes
-* Update README.md
-* Update wiki link + add realtime_tools wiki
-* Add Gennaro and Bence as maintainers
+* Update readme
+* use this_thread::sleep_for instead of usleep (`#32 <https://github.com/ros-controls/realtime_tools/issues/32>`_)
+* specify RUNTIME DESTINATION for libraries (`#33 <https://github.com/ros-controls/realtime_tools/issues/33>`_)
+  needed for exporting DLLs on Windows
+* Made RealtimeBuffer's copy-constructor const
+* Contributors: Bence Magyar, Gennaro Raiola, James Xu, Mathias Lüdtke, Matt Reynolds
+
+1.12.0 (2018-05-19)
+-------------------
+* Add RealtimePublisherSharedPtr<T>
+* boost::shared_ptr -> std::shared_ptr
 * Contributors: Bence Magyar
 
 1.11.0 (2017-11-06)
