@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 hiDOF, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,50 +27,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Publishing ROS messages is difficult, as the publish function is
- * not realtime safe.  This class provides the proper locking so that
- * you can call publish in realtime and a separate (non-realtime)
- * thread will ensure that the message gets published over ROS.
- *
- * Author: Wim Meeussen
- */
+#include <gmock/gmock.h>
+#include <realtime_tools/realtime_box.h>
 
-#ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
-#define REALTIME_TOOLS__REALTIME_CLOCK_H_
+using realtime_tools::RealtimeBox;
 
-#include <ros/ros.h>
-
-#include <mutex>
-#include <thread>
-
-namespace realtime_tools
+class DefaultConstructable
 {
+  public:
+    DefaultConstructable() : number_(42) {};
+    ~DefaultConstructable() {};
+    int number_;
+};
 
-class RealtimeClock
+TEST(RealtimeBox, default_construct)
 {
- public:
-  RealtimeClock();
-  ~RealtimeClock();
+  DefaultConstructable thing;
+  thing.number_ = 5;
 
-  ros::Time getSystemTime(const ros::Time& realtime_time);
-  void loop();
+  RealtimeBox<DefaultConstructable> box;
+  box.get(thing);
 
+  EXPECT_EQ(42, thing.number_);
+}
 
- private:
-  unsigned int lock_misses_ = 0;
-  ros::Time system_time_;
-  ros::Duration clock_offset_;
+TEST(RealtimeBox, initial_value)
+{
+  RealtimeBox<double> box(3.14);
+  double num = 0.0;
+  box.get(num);
+  EXPECT_DOUBLE_EQ(3.14, num);
+}
 
-  ros::Time last_realtime_time_;
-  bool running_ = false;
-  bool initialized_ = false;
-  std::mutex mutex_;
-  std::thread thread_;
+TEST(RealtimeBox, set_and_get)
+{
+  RealtimeBox<char> box('a');
 
+  {
+    const char input = 'z';
+    box.set(input);
+  }
 
-
-}; // class
-}// namespace
-
-#endif
+  char output = 'a';
+  box.get(output);
+  EXPECT_EQ('z', output);
+}
