@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 hiDOF, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,50 +27,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Publishing ROS messages is difficult, as the publish function is
- * not realtime safe.  This class provides the proper locking so that
- * you can call publish in realtime and a separate (non-realtime)
- * thread will ensure that the message gets published over ROS.
- *
- * Author: Wim Meeussen
- */
-
-#ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
-#define REALTIME_TOOLS__REALTIME_CLOCK_H_
-
-#include <ros/ros.h>
-
-#include <mutex>
+#include <gmock/gmock.h>
+#include <realtime_tools/realtime_clock.h>
+#include <chrono>
 #include <thread>
 
-namespace realtime_tools
+using realtime_tools::RealtimeClock;
+
+TEST(RealtimeClock, get_system_time)
 {
+  const int ATTEMPTS = 10;
+  const std::chrono::milliseconds DELAY(1);
 
-class RealtimeClock
-{
- public:
-  RealtimeClock();
-  ~RealtimeClock();
+  RealtimeClock rt_clock;
+  // Wait for time to be available
+  ros::Time last_rt_time;
+  for (int i = 0; i < ATTEMPTS && ros::Time() == last_rt_time; ++i)
+  {
+    std::this_thread::sleep_for(DELAY);
+    last_rt_time = rt_clock.getSystemTime(ros::Time());
+  }
+  ASSERT_NE(ros::Time(), last_rt_time);
 
-  ros::Time getSystemTime(const ros::Time& realtime_time);
-  void loop();
+  // This test assumes system time will not jump backwards during it
+  EXPECT_GT(rt_clock.getSystemTime(last_rt_time), last_rt_time);
+}
 
-
- private:
-  unsigned int lock_misses_ = 0;
-  ros::Time system_time_;
-  ros::Duration clock_offset_;
-
-  ros::Time last_realtime_time_;
-  bool running_ = false;
-  bool initialized_ = false;
-  std::mutex mutex_;
-  std::thread thread_;
-
-
-
-}; // class
-}// namespace
-
-#endif
+int main(int argc, char ** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  ros::Time::init();
+  return RUN_ALL_TESTS();
+}

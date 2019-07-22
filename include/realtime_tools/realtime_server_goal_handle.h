@@ -31,8 +31,9 @@
 #define REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H
 
 // Standard
-#include <inttypes.h>
 #include <memory>
+
+#include <boost/shared_ptr.hpp>
 
 // Actionlib
 #include <actionlib/server/action_server.h>
