@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 hiDOF, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,50 +27,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Publishing ROS messages is difficult, as the publish function is
- * not realtime safe.  This class provides the proper locking so that
- * you can call publish in realtime and a separate (non-realtime)
- * thread will ensure that the message gets published over ROS.
- *
- * Author: Wim Meeussen
- */
+#include <gmock/gmock.h>
+#include <realtime_tools/realtime_buffer.h>
 
-#ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
-#define REALTIME_TOOLS__REALTIME_CLOCK_H_
+using realtime_tools::RealtimeBuffer;
 
-#include <ros/ros.h>
-
-#include <mutex>
-#include <thread>
-
-namespace realtime_tools
+class DefaultConstructable
 {
+  public:
+    DefaultConstructable() : number_(42) {};
+    ~DefaultConstructable() {};
+    int number_;
+};
 
-class RealtimeClock
+TEST(RealtimeBuffer, default_construct)
 {
- public:
-  RealtimeClock();
-  ~RealtimeClock();
+  RealtimeBuffer<DefaultConstructable> buffer;
+  EXPECT_EQ(42, buffer.readFromRT()->number_);
+}
 
-  ros::Time getSystemTime(const ros::Time& realtime_time);
-  void loop();
+TEST(RealtimeBuffer, initial_value)
+{
+  RealtimeBuffer<double> buffer(3.14);
+  EXPECT_DOUBLE_EQ(3.14, *buffer.readFromRT());
+}
 
+TEST(RealtimeBuffer, copy_construct)
+{
+  const RealtimeBuffer<char> buffer('a');
+  RealtimeBuffer<char> buffer_copy(buffer);
+  EXPECT_EQ('a', *buffer_copy.readFromRT());
+}
 
- private:
-  unsigned int lock_misses_ = 0;
-  ros::Time system_time_;
-  ros::Duration clock_offset_;
+TEST(RealtimeBuffer, assignment_operator)
+{
+  const RealtimeBuffer<char> buffer('a');
+  RealtimeBuffer<char> buffer2('z');
 
-  ros::Time last_realtime_time_;
-  bool running_ = false;
-  bool initialized_ = false;
-  std::mutex mutex_;
-  std::thread thread_;
+  EXPECT_EQ('z', *buffer2.readFromRT());
+  buffer2 = buffer;
+  EXPECT_EQ('a', *buffer2.readFromRT());
+}
 
+TEST(RealtimeBuffer, write_read_non_rt)
+{
+  RealtimeBuffer<int> buffer(42);
 
+  buffer.writeFromNonRT(28);
+  EXPECT_EQ(28, *buffer.readFromNonRT());
+}
 
-}; // class
-}// namespace
-
-#endif
+TEST(RealtimeBuffer, initRT)
+{
+  RealtimeBuffer<int> buffer(42);
+  buffer.initRT(28);
+  EXPECT_EQ(28, *buffer.readFromRT());
+}
