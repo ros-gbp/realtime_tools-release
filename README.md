@@ -1,3 +1,26 @@
+## realtime_tools (melodic) - 1.15.0-1
+
+The packages in the `realtime_tools` repository were released into the `melodic` distro by running `/usr/bin/bloom-release realtime_tools --track melodic --rosdistro melodic` on `Fri, 09 Aug 2019 07:28:00 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: https://github.com/ros-gbp/realtime_tools-release.git
+- rosdistro version: `1.14.0-1`
+- old version: `1.14.0-1`
+- new version: `1.15.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.8.0`
+- catkin_pkg version: `0.4.12`
+- rosdep version: `0.15.2`
+- rosdistro version: `0.7.4`
+- vcstools version: `0.1.40`
+
+
 ## realtime_tools (melodic) - 1.14.0-1
 
 The packages in the `realtime_tools` repository were released into the `melodic` distro by running `/usr/bin/bloom-release realtime_tools --track melodic --rosdistro melodic` on `Mon, 22 Jul 2019 11:59:33 -0000`
