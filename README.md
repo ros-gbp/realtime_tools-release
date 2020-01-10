@@ -1,3 +1,26 @@
+## realtime_tools (eloquent) - 2.0.0-1
+
+The packages in the `realtime_tools` repository were released into the `eloquent` distro by running `/usr/bin/bloom-release realtime_tools --track eloquent --rosdistro eloquent --edit` on `Fri, 10 Jan 2020 07:56:59 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `2.0.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.8.0`
+- catkin_pkg version: `0.4.13`
+- rosdep version: `0.15.2`
+- rosdistro version: `0.7.4`
+- vcstools version: `0.1.42`
+
+
 ## realtime_tools (dashing) - 2.0.0-1
 
 The packages in the `realtime_tools` repository were released into the `dashing` distro by running `/usr/bin/bloom-release realtime_tools --track dashing --rosdistro dashing --edit` on `Mon, 09 Sep 2019 07:38:02 -0000`
