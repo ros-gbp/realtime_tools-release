@@ -1,0 +1,12 @@
+Source: ros-melodic-realtime-tools
+Section: misc
+Priority: optional
+Maintainer: Bence Magyar <bence.magyar.robotics@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-melodic-actionlib, ros-melodic-catkin, ros-melodic-roscpp, ros-melodic-rostest, ros-melodic-rosunit
+Homepage: http://ros.org/wiki/realtime_tools
+Standards-Version: 3.9.2
+
+Package: ros-melodic-realtime-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-melodic-actionlib, ros-melodic-roscpp
+Description: Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
