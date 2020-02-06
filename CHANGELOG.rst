@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.15.1 (2020-02-06)
+-------------------
+* Check whether thread joinable before joining
+* realtime_server_goal_handle_tests needs actionlib
+* Contributors: Maverobot, Shane Loretz
+
 1.15.0 (2019-08-09)
 -------------------
 * Remove actionlib definitions
