@@ -2,18 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.0 (2019-09-09)
-------------------
-* Add test_depend ament_cmake_gmock
-* Update CI for dashing
-* Add sloretz as another author
-* Typename and typos in RTPublisher
-* Shorter type names
-* Port RealtimeServerGoalHandle to ROS 2
-* Port RealtimePublisher to ROS 2
-  Use test_msgs instead of std_msgs
-* Box and buffer work in ROS 2 unchanged
-* Port RealtimeClock to ROS 2
+1.15.1 (2020-02-06)
+-------------------
+* Check whether thread joinable before joining
+* realtime_server_goal_handle_tests needs actionlib
+* Contributors: Maverobot, Shane Loretz
+
+1.15.0 (2019-08-09)
+-------------------
 * Remove actionlib definitions
 * Contributors: Shane Loretz
 

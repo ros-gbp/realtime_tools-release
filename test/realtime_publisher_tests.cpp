@@ -29,47 +29,47 @@
 
 #include <gmock/gmock.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <test_msgs/msg/strings.hpp>
+#include <std_msgs/String.h>
 #include <chrono>
 #include <mutex>
 #include <thread>
 
-#include <rclcpp/executors.hpp>
-#include <rclcpp/node.hpp>
-#include <rclcpp/utilities.hpp>
-
-using StringMsg = test_msgs::msg::Strings;
 using realtime_tools::RealtimePublisher;
 
 TEST(RealtimePublisher, construct_destruct)
 {
-  RealtimePublisher<StringMsg> rt_pub;
+  ros::NodeHandle nh;
+  RealtimePublisher<std_msgs::String> rt_pub(nh, "construct_destruct", 10);
+}
+
+TEST(RealtimePublisher, construct_init_destruct)
+{
+  RealtimePublisher<std_msgs::String> rt_pub;
+  ros::NodeHandle nh;
+  rt_pub.init(nh, "construct_init_destruct", 10);
 }
 
 struct StringCallback
 {
-  StringMsg msg_;
+  std_msgs::String msg_;
   std::mutex mtx_;
 
-  void callback(const StringMsg::SharedPtr msg)
+  void callback(const std_msgs::String & msg)
   {
     std::unique_lock<std::mutex> lock(mtx_);
-    msg_ = *msg;
+    msg_ = msg;
   }
 };
 
 TEST(RealtimePublisher, rt_publish)
 {
-  rclcpp::init(0, nullptr);
   const size_t ATTEMPTS = 10;
   const std::chrono::milliseconds DELAY(250);
 
   const char * expected_msg = "Hello World";
-  auto node = std::make_shared<rclcpp::Node>("construct_move_destruct");
-  rclcpp::QoS qos(10);
-  qos.reliable().transient_local();
-  auto pub = node->create_publisher<StringMsg>("~/rt_publish", qos);
-  RealtimePublisher<StringMsg> rt_pub(pub);
+  ros::NodeHandle nh;
+  const bool latching = true;
+  RealtimePublisher<std_msgs::String> rt_pub(nh, "rt_publish", 10, latching);
   // publish a latched message
   bool lock_is_held = rt_pub.trylock();
   for (size_t i = 0; i < ATTEMPTS && !lock_is_held; ++i)
@@ -78,21 +78,23 @@ TEST(RealtimePublisher, rt_publish)
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_TRUE(lock_is_held);
-  rt_pub.msg_.string_value = expected_msg;
+  rt_pub.msg_.data = expected_msg;
   rt_pub.unlockAndPublish();
 
   // make sure subscriber gets it
   StringCallback str_callback;
 
-  auto sub = node->create_subscription<StringMsg>(
-    "~/rt_publish",
-    qos,
-    std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
-  for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.string_value.empty(); ++i)
+  ros::Subscriber sub = nh.subscribe("rt_publish", 10, &StringCallback::callback, &str_callback);
+  for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.data.empty(); ++i)
   {
-    rclcpp::spin_some(node);
+    ros::spinOnce();
     std::this_thread::sleep_for(DELAY);
   }
-  EXPECT_STREQ(expected_msg, str_callback.msg_.string_value.c_str());
-  rclcpp::shutdown();
+  EXPECT_STREQ(expected_msg, str_callback.msg_.data.c_str());
+}
+
+int main(int argc, char ** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  ros::init(argc, argv, "realtime_publisher_tests");
+  return RUN_ALL_TESTS();
 }
