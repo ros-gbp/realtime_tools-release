@@ -1,0 +1,12 @@
+Source: ros-noetic-realtime-tools
+Section: misc
+Priority: optional
+Maintainer: Bence Magyar <bence.magyar.robotics@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-noetic-actionlib, ros-noetic-catkin, ros-noetic-roscpp, ros-noetic-rostest, ros-noetic-rosunit
+Homepage: http://ros.org/wiki/realtime_tools
+Standards-Version: 3.9.2
+
+Package: ros-noetic-realtime-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-noetic-actionlib, ros-noetic-roscpp
+Description: Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
