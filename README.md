@@ -1,3 +1,26 @@
+## realtime_tools (foxy) - 2.1.0-1
+
+The packages in the `realtime_tools` repository were released into the `foxy` distro by running `/usr/bin/bloom-release --track foxy --rosdistro foxy realtime_tools --edit` on `Fri, 03 Jul 2020 14:37:22 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `2.1.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.9.7`
+- catkin_pkg version: `0.4.20`
+- rosdep version: `0.15.2`
+- rosdistro version: `0.8.0`
+- vcstools version: `0.1.42`
+
+
 ## realtime_tools (noetic) - 1.16.0-1
 
 The packages in the `realtime_tools` repository were released into the `noetic` distro by running `/usr/bin/bloom-release realtime_tools --track noetic --rosdistro noetic --edit` on `Wed, 11 Mar 2020 08:08:58 -0000`
