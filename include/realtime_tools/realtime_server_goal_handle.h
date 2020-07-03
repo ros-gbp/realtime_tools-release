@@ -27,127 +27,147 @@
 
 /// \author Stuart Glaser
 
-#ifndef REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H
-#define REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H
+#ifndef REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H_
+#define REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H_
 
-// Standard
 #include <memory>
 
-// Actionlib
-#include <actionlib/server/action_server.h>
+#include "rclcpp/exceptions.hpp"
+#include "rclcpp/logging.hpp"
+#include "rclcpp_action/server_goal_handle.hpp"
 
 namespace realtime_tools
 {
 
-template <class Action>
+template<class Action>
 class RealtimeServerGoalHandle
 {
 private:
-  ACTION_DEFINITION(Action);
-
-  typedef actionlib::ServerGoalHandle<Action> GoalHandle;
+  using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
+  using ResultSharedPtr = typename Action::Result::SharedPtr;
+  using FeedbackSharedPtr = typename Action::Feedback::SharedPtr;
 
   uint8_t state_;
 
   bool req_abort_;
   bool req_cancel_;
   bool req_succeed_;
-  ResultConstPtr req_result_;
-  FeedbackConstPtr req_feedback_;
+  bool req_execute_;
+
+  std::mutex mutex_;
+  ResultSharedPtr req_result_;
+  FeedbackSharedPtr req_feedback_;
+  rclcpp::Logger logger_;
 
 public:
-  GoalHandle gh_;
-  ResultPtr preallocated_result_;  // Preallocated so it can be used in realtime
-  FeedbackPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
+  std::shared_ptr<GoalHandle> gh_;
+  ResultSharedPtr preallocated_result_;      // Preallocated so it can be used in realtime
+  FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
 
-  RealtimeServerGoalHandle(GoalHandle &gh, const ResultPtr &preallocated_result = ResultPtr((Result*)NULL), const FeedbackPtr &preallocated_feedback = FeedbackPtr((Feedback*)NULL))
-    : req_abort_(false),
-      req_cancel_(false),
-      req_succeed_(false),
-      gh_(gh),
-      preallocated_result_(preallocated_result),
-      preallocated_feedback_(preallocated_feedback)
+  explicit RealtimeServerGoalHandle(
+    std::shared_ptr<GoalHandle> & gh,
+    const ResultSharedPtr & preallocated_result = nullptr,
+    const FeedbackSharedPtr & preallocated_feedback = nullptr)
+  : RealtimeServerGoalHandle(
+      gh, preallocated_result, preallocated_feedback, rclcpp::get_logger("realtime_tools"))
   {
-    if (!preallocated_result_)
-      preallocated_result_.reset(new Result);
-    if (!preallocated_feedback_)
-      preallocated_feedback_.reset(new Feedback);
   }
 
-  void setAborted(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  RealtimeServerGoalHandle(
+    std::shared_ptr<GoalHandle> & gh,
+    const ResultSharedPtr & preallocated_result,
+    const FeedbackSharedPtr & preallocated_feedback,
+    rclcpp::Logger logger)
+  : req_abort_(false),
+    req_cancel_(false),
+    req_succeed_(false),
+    req_execute_(false),
+    logger_(logger),
+    gh_(gh),
+    preallocated_result_(preallocated_result),
+    preallocated_feedback_(preallocated_feedback)
   {
-    if (!req_succeed_ && !req_abort_ && !req_cancel_)
-    {
+    if (!preallocated_result_) {preallocated_result_.reset(new typename Action::Result);}
+    if (!preallocated_feedback_) {preallocated_feedback_.reset(new typename Action::Feedback);}
+  }
+
+  void setAborted(ResultSharedPtr result = nullptr)
+  {
+    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_abort_ = true;
     }
   }
 
-  void setCanceled(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  void setCanceled(ResultSharedPtr result = nullptr)
   {
-    if (!req_succeed_ && !req_abort_ && !req_cancel_)
-    {
+    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_cancel_ = true;
     }
   }
 
-  void setSucceeded(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  void setSucceeded(ResultSharedPtr result = nullptr)
   {
-    if (!req_succeed_ && !req_abort_ && !req_cancel_)
-    {
+    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_succeed_ = true;
     }
   }
 
-  void setFeedback(FeedbackConstPtr feedback = FeedbackConstPtr((Feedback*)NULL))
+  void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
+    std::lock_guard<std::mutex> guard(mutex_);
     req_feedback_ = feedback;
   }
 
-  bool valid()
+  void execute()
   {
-    return gh_.getGoal() != NULL;
+    if (!req_succeed_ && !req_abort_ && !req_cancel_) {
+      std::lock_guard<std::mutex> guard(mutex_);
+      req_execute_ = true;
+    }
   }
 
-  void runNonRealtime(const ros::TimerEvent &te)
+  bool valid() {return nullptr != gh_.get();}
+
+  void runNonRealtime()
   {
-    using namespace actionlib_msgs;
-    if (valid())
-    {
-      actionlib_msgs::GoalStatus gs = gh_.getGoalStatus();
-      if (req_abort_ && (gs.status == GoalStatus::ACTIVE ||
-                         gs.status == GoalStatus::PREEMPTING))
-      {
-        if (req_result_)
-          gh_.setAborted(*req_result_);
-        else
-          gh_.setAborted();
+    if (!valid()) {return;}
+
+    std::lock_guard<std::mutex> guard(mutex_);
+
+    try {
+      if (req_execute_ && !gh_->is_executing() && gh_->is_active() && !gh_->is_canceling()) {
+        gh_->execute();
       }
-      else if (req_cancel_ && gs.status == GoalStatus::PREEMPTING)
-      {
-        if (req_result_)
-          gh_.setCanceled(*req_result_);
-        else
-          gh_.setCanceled();
+      if (req_abort_ && gh_->is_executing()) {
+        gh_->abort(req_result_);
+        req_abort_ = false;
       }
-      else if (req_succeed_ && (gs.status == GoalStatus::ACTIVE ||
-                                gs.status == GoalStatus::PREEMPTING))
-      {
-        if (req_result_)
-          gh_.setSucceeded(*req_result_);
-        else
-          gh_.setSucceeded();
+      if (req_cancel_ && gh_->is_active()) {
+        gh_->canceled(req_result_);
+        req_cancel_ = false;
       }
-      if (req_feedback_ && gs.status == GoalStatus::ACTIVE)
-      {
-        gh_.publishFeedback(*req_feedback_);
+      if (req_succeed_ && !gh_->is_canceling()) {
+        gh_->succeed(req_result_);
+        req_succeed_ = false;
       }
+      if (req_feedback_ && gh_->is_executing()) {
+        gh_->publish_feedback(req_feedback_);
+      }
+    } catch (const rclcpp::exceptions::RCLErrorBase & e) {
+      // Likely invalid state transition
+      RCLCPP_WARN(logger_, e.formatted_message);
     }
   }
 };
 
-} // namespace
-
-#endif // header guard
+}  // namespace realtime_tools
+#endif  // REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H_
