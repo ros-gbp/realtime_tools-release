@@ -38,6 +38,8 @@
 #ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 
+#include <ros/node_handle.h>
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -46,16 +48,11 @@
 #include <string>
 #include <thread>
 
-#include "rclcpp/publisher.hpp"
+namespace realtime_tools {
 
-namespace realtime_tools
-{
-
-template<class Msg>
+template <class Msg>
 class RealtimePublisher
 {
-private:
-  using PublisherSharedPtr = typename rclcpp::Publisher<Msg>::SharedPtr;
 
 public:
   /// The msg_ variable contains the data that will get published on the ROS topic.
@@ -63,27 +60,43 @@ public:
 
   /**  \brief Constructor for the realtime publisher
    *
-   * \param publisher the publisher to wrap
+   * \param node the nodehandle that specifies the namespace (or prefix) that is used to advertise the ROS topic
+   * \param topic the topic name to advertise
+   * \param queue_size the size of the outgoing ROS buffer
+   * \param latched . optional argument (defaults to false) to specify is publisher is latched or not
    */
-  explicit RealtimePublisher(PublisherSharedPtr publisher)
-  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(LOOP_NOT_STARTED)
+  RealtimePublisher(const ros::NodeHandle &node, const std::string &topic, int queue_size, bool latched=false)
+    : topic_(topic), node_(node), is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED)
   {
-    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+    construct(queue_size, latched);
   }
 
   RealtimePublisher()
-  : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
+    : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED)
+  {
+  }
 
   /// Destructor
   ~RealtimePublisher()
   {
     stop();
-    while (is_running()) {
+    while (is_running())
+    {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
-    if (thread_.joinable()) {
+
+    if (thread_.joinable())
+    {
       thread_.join();
     }
+    publisher_.shutdown();
+  }
+
+  void init(const ros::NodeHandle &node, const std::string &topic, int queue_size, bool latched=false)
+  {
+    topic_ = topic;
+    node_ = node;
+    construct(queue_size, latched);
   }
 
   /// Stop the realtime publisher from sending out more ROS messages
@@ -103,14 +116,20 @@ public:
    */
   bool trylock()
   {
-    if (msg_mutex_.try_lock()) {
-      if (turn_ == REALTIME) {
+    if (msg_mutex_.try_lock())
+    {
+      if (turn_ == REALTIME)
+      {
         return true;
-      } else {
+      }
+      else
+      {
         msg_mutex_.unlock();
         return false;
       }
-    } else {
+    }
+    else
+    {
       return false;
     }
   }
@@ -142,7 +161,8 @@ public:
     msg_mutex_.lock();
 #else
     // never actually block on the lock
-    while (!msg_mutex_.try_lock()) {
+    while (!msg_mutex_.try_lock())
+    {
       std::this_thread::sleep_for(std::chrono::microseconds(200));
     }
 #endif
@@ -151,26 +171,39 @@ public:
   /**  \brief Unlocks the data without publishing anything
    *
    */
-  void unlock() {msg_mutex_.unlock();}
+  void unlock()
+  {
+    msg_mutex_.unlock();
+  }
 
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
 
-  bool is_running() const {return is_running_;}
+  void construct(int queue_size, bool latched=false)
+  {
+    publisher_ = node_.advertise<Msg>(topic_, queue_size, latched);
+    keep_running_ = true;
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+  }
+
+
+  bool is_running() const { return is_running_; }
 
   void publishingLoop()
   {
     is_running_ = true;
     turn_ = REALTIME;
 
-    while (keep_running_) {
+    while (keep_running_)
+    {
       Msg outgoing;
 
       // Locks msg_ and copies it
       lock();
-      while (turn_ != NON_REALTIME && keep_running_) {
+      while (turn_ != NON_REALTIME && keep_running_)
+      {
 #ifdef NON_POLLING
         updated_cond_.wait(lock);
 #else
@@ -185,12 +218,15 @@ private:
       unlock();
 
       // Sends the outgoing message
-      if (keep_running_) {publisher_->publish(outgoing);}
+      if (keep_running_)
+        publisher_.publish(outgoing);
     }
     is_running_ = false;
   }
 
-  PublisherSharedPtr publisher_;
+  std::string topic_;
+  ros::NodeHandle node_;
+  ros::Publisher publisher_;
   std::atomic<bool> is_running_;
   std::atomic<bool> keep_running_;
 
@@ -202,12 +238,13 @@ private:
   std::condition_variable updated_cond_;
 #endif
 
-  enum { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
+  enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
   std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
-template<class Msg>
-using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
+template <class Msg>
+using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg> >;
 
-}  // namespace realtime_tools
-#endif  // REALTIME_TOOLS__REALTIME_PUBLISHER_H_
+}
+
+#endif

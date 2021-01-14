@@ -28,12 +28,9 @@
  */
 
 #include <gmock/gmock.h>
-
+#include <realtime_tools/realtime_clock.h>
 #include <chrono>
 #include <thread>
-
-#include "rclcpp/utilities.hpp"
-#include "realtime_tools/realtime_clock.h"
 
 using realtime_tools::RealtimeClock;
 
@@ -42,16 +39,22 @@ TEST(RealtimeClock, get_system_time)
   const int ATTEMPTS = 10;
   const std::chrono::milliseconds DELAY(1);
 
-  rclcpp::Clock::SharedPtr clock(new rclcpp::Clock());
-  RealtimeClock rt_clock(clock);
+  RealtimeClock rt_clock;
   // Wait for time to be available
-  rclcpp::Time last_rt_time;
-  for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i) {
+  ros::Time last_rt_time;
+  for (int i = 0; i < ATTEMPTS && ros::Time() == last_rt_time; ++i)
+  {
     std::this_thread::sleep_for(DELAY);
-    last_rt_time = rt_clock.now(rclcpp::Time());
+    last_rt_time = rt_clock.getSystemTime(ros::Time());
   }
-  ASSERT_NE(rclcpp::Time(), last_rt_time);
+  ASSERT_NE(ros::Time(), last_rt_time);
 
   // This test assumes system time will not jump backwards during it
-  EXPECT_GT(rt_clock.now(last_rt_time), last_rt_time);
+  EXPECT_GT(rt_clock.getSystemTime(last_rt_time), last_rt_time);
+}
+
+int main(int argc, char ** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  ros::Time::init();
+  return RUN_ALL_TESTS();
 }
