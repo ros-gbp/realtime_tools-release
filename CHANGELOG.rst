@@ -2,76 +2,18 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.1.1 (2021-03-21)
-------------------
-* Fix deprecation warnings when constructing rclcpp::Duration
-  Since https://github.com/ros2/rclcpp/pull/1432 (upcoming in Galactic), we should not initialize with a single integer
-  as the units are ambiguous.
-* fix the mis-type error.
-* Fix uninitialized variable
-* Contributors: Jacob Perron, Victor Lopez, seanyen
-
-2.1.0 (2020-07-03)
-------------------
-* fix msbuild warning
-* address linter failures
-* enable linters
-* avoid deprecations
-* Realtime server goal thread handle safety + additional warning fixes (`#2 <https://github.com/ros-controls/realtime_tools/issues/2>`_) (`#57 <https://github.com/ros-controls/realtime_tools/issues/57>`_)
-  * Made code thread safe, fixed warnings with repeated aborts/success/cancels
-  Fixed -reorder warning
-  Early return
-  * removed atomic
-  * removed unneeded header
-* use template instead
-* use std::atomic instead of volatile
-* Contributors: Karsten Knese, Yutaka Kondo, ddengster
-
-2.0.0 (2019-09-09)
-------------------
-* Add test_depend ament_cmake_gmock
-* Update CI for dashing
-* Add sloretz as another author
-* Typename and typos in RTPublisher
-* Shorter type names
-* Port RealtimeServerGoalHandle to ROS 2
-* Port RealtimePublisher to ROS 2
-  Use test_msgs instead of std_msgs
-* Box and buffer work in ROS 2 unchanged
-* Port RealtimeClock to ROS 2
-* Remove actionlib definitions
-* Contributors: Shane Loretz
-
-1.14.0 (2019-07-22)
+1.11.2 (2021-03-21)
 -------------------
-* Undo action typedef changes
-* Remove boost
-* Clean up includes in `realtime_tools` namespace
-* Switch to gmock
-* Remove TARGET check on tests
-* Add unit test for RealtimeServerGoalHandle, RealtimePublisher, RealtimeClock, RealtimeBuffer, RealtimeBox
-* Fix race where first message won't get published
-* Clean up dependencies and package.xml
-* Contributors: Shane Loretz
+* Remove lunar builds
+* Made copy-constructor const
+* Contributors: Bence Magyar, Matt Reynolds
 
-1.13.1 (2019-02-14)
+1.11.1 (2019-02-11)
 -------------------
-* Fix actionlib regression
-* Contributors: Bence Magyar
-
-1.13.0 (2019-02-11)
--------------------
-* Update readme
-* use this_thread::sleep_for instead of usleep (`#32 <https://github.com/ros-controls/realtime_tools/issues/32>`_)
-* specify RUNTIME DESTINATION for libraries (`#33 <https://github.com/ros-controls/realtime_tools/issues/33>`_)
-  needed for exporting DLLs on Windows
-* Made RealtimeBuffer's copy-constructor const
-* Contributors: Bence Magyar, Gennaro Raiola, James Xu, Mathias Lüdtke, Matt Reynolds
-
-1.12.0 (2018-05-19)
--------------------
-* Add RealtimePublisherSharedPtr<T>
-* boost::shared_ptr -> std::shared_ptr
+* -- No functionality changes
+* Update README.md
+* Update wiki link + add realtime_tools wiki
+* Add Gennaro and Bence as maintainers
 * Contributors: Bence Magyar
 
 1.11.0 (2017-11-06)

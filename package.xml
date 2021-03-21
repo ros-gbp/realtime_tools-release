@@ -1,8 +1,16 @@
-<package format="2">
+<package>
   <name>realtime_tools</name>
-  <version>2.1.1</version>
+  <version>1.11.2</version>
   <description>Contains a set of tools that can be used from a hard
-    realtime thread, without breaking the realtime behavior.</description>
+    realtime thread, without breaking the realtime behavior.  The
+    tools currently only provides the realtime publisher, which makes
+    it possible to publish messages to a ROS topic from a realtime
+    thread. We plan to add a basic implementation of a realtime
+    buffer, to make it possible to get data from a (non-realtime)
+    topic callback into the realtime loop. Once the lockfree buffer is
+    created, the realtime publisher will start using it, which will
+    result in major API changes for the realtime publisher (removal of
+    all lock methods).</description>
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
   <maintainer email="gennaro.raiola@iit.it">Gennaro Raiola</maintainer>
 
@@ -13,22 +21,13 @@
   <url type="repository">https://github.com/ros-controls/realtime_tools/</url>
 
   <author email="sglaser@willowgarage.com">Stuart Glaser</author>
-  <author email="sloretz@openrobotics.org">Shane Loretz</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
+  <build_depend>roscpp</build_depend> 
+  <build_depend>rospy</build_depend> 
 
-  <depend>rclcpp</depend>
-  <depend>rclcpp_action</depend>
+  <run_depend>roscpp</run_depend> 
+  <run_depend>rospy</run_depend> 
 
-  <test_depend>ament_cmake_gmock</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-  <test_depend>rclcpp_action</test_depend>
-  <test_depend>test_msgs</test_depend>
-
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
 </package>

@@ -39,19 +39,17 @@
 #ifndef REALTIME_TOOLS__REALTIME_BUFFER_H_
 #define REALTIME_TOOLS__REALTIME_BUFFER_H_
 
-#include <chrono>
-#include <mutex>
-#include <thread>
+#include <boost/thread/mutex.hpp>
 
 namespace realtime_tools
 {
 
-template<class T>
+template <class T>
 class RealtimeBuffer
 {
-public:
+ public:
   RealtimeBuffer()
-  : new_data_available_(false)
+    : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T();
@@ -63,8 +61,7 @@ public:
    * a default constructor
    * @param data The object to use as default value
    */
-  explicit RealtimeBuffer(const T & data)
-  : new_data_available_(false)
+  RealtimeBuffer(const T& data)
   {
     // allocate memory
     non_realtime_data_ = new T(data);
@@ -73,11 +70,13 @@ public:
 
   ~RealtimeBuffer()
   {
-    if (non_realtime_data_) {delete non_realtime_data_;}
-    if (realtime_data_) {delete realtime_data_;}
+    if (non_realtime_data_)
+      delete non_realtime_data_;
+    if (realtime_data_)
+      delete realtime_data_;
   }
 
-  RealtimeBuffer(const RealtimeBuffer & source)
+  RealtimeBuffer(const RealtimeBuffer &source)
   {
     // allocate memory
     non_realtime_data_ = new T();
@@ -90,9 +89,10 @@ public:
   /*!
    * @brief Custom assignment operator
    */
-  RealtimeBuffer & operator=(const RealtimeBuffer & source)
+  RealtimeBuffer &operator =(const RealtimeBuffer& source)
   {
-    if (this == &source) {return *this;}
+    if (this == &source)
+      return *this;
 
     // Copy the data from old RTB to new RTB
     writeFromNonRT(*source.readFromNonRT());
@@ -100,63 +100,72 @@ public:
     return *this;
   }
 
-  T * readFromRT()
+  T* readFromRT()
   {
     // Check if the data is currently being written to (is locked)
-    std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
-    if (guard.owns_lock()) {
+    if (mutex_.try_lock())
+    {
       // swap pointers
-      if (new_data_available_) {
-        T * tmp = realtime_data_;
-        realtime_data_ = non_realtime_data_;
+      if (new_data_available_)
+      {
+        T* tmp = realtime_data_;
+	realtime_data_ = non_realtime_data_;
         non_realtime_data_ = tmp;
-        new_data_available_ = false;
+	new_data_available_ = false;
       }
+      mutex_.unlock();
     }
     return realtime_data_;
   }
 
-  T * readFromNonRT() const
+  T* readFromNonRT() const
   {
-    std::lock_guard<std::mutex> guard(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
 
-    if (new_data_available_) {
+    if (new_data_available_)
       return non_realtime_data_;
-    } else {
+    else
       return realtime_data_;
-    }
   }
 
-  void writeFromNonRT(const T & data)
+  void writeFromNonRT(const T& data)
   {
-#ifdef NON_POLLING
-    std::lock_guard<std::mutex> guard(mutex_);
-#else
-    std::unique_lock<std::mutex> guard(mutex_, std::defer_lock);
-    while (!guard.try_lock()) {
-      std::this_thread::sleep_for(std::chrono::microseconds(500));
-    }
-#endif
+    // get lock
+    lock();
 
     // copy data into non-realtime buffer
     *non_realtime_data_ = data;
     new_data_available_ = true;
+
+    // release lock
+    mutex_.unlock();
   }
 
-  void initRT(const T & data)
+  void initRT(const T& data)
   {
-    *non_realtime_data_ = data;
-    *realtime_data_ = data;
+    *non_realtime_data_ = data;    
+    *realtime_data_ = data;    
   }
 
-private:
-  T * realtime_data_;
-  T * non_realtime_data_;
+ private:
+  void lock()
+  {
+#ifdef NON_POLLING
+    mutex_.lock();
+#else
+    while (!mutex_.try_lock())
+      usleep(500);
+#endif
+  }
+
+  T* realtime_data_;
+  T* non_realtime_data_;
   bool new_data_available_;
 
   // Set as mutable so that readFromNonRT() can be performed on a const buffer
-  mutable std::mutex mutex_;
-};  // class
+  mutable boost::mutex mutex_;
 
-}  // namespace realtime_tools
-#endif  // REALTIME_TOOLS__REALTIME_BUFFER_H_
+}; // class
+}// namespace
+
+#endif

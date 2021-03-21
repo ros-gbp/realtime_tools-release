@@ -32,33 +32,36 @@
 #ifndef REALTIME_TOOLS__REALTIME_BOX_H__
 #define REALTIME_TOOLS__REALTIME_BOX_H__
 
-#include <mutex>
 #include <string>
+#include <ros/node_handle.h>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
 
-namespace realtime_tools
-{
+namespace realtime_tools {
+
 /*!
 
-  Strongly suggested that you use an std::shared_ptr in this box to
+  Strongly suggested that you use a boost::shared_ptr in this box to
   guarantee realtime safety.
 
  */
-template<class T>
+template <class T>
 class RealtimeBox
 {
 public:
-  explicit RealtimeBox(const T & initial = T())
-  : thing_(initial) {}
-
-  void set(const T & value)
+  RealtimeBox(const T &initial = T()) : thing_(initial)
   {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
+  }
+
+  void set(const T &value)
+  {
+    boost::mutex::scoped_lock guard(thing_lock_RT_);
     thing_ = value;
   }
 
-  void get(T & ref)
+  void get(T &ref)
   {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
+    boost::mutex::scoped_lock guard(thing_lock_RT_);
     ref = thing_;
   }
 
@@ -71,9 +74,9 @@ private:
   // copy, so as long as the copy is realtime safe and the OS has
   // priority inheritance for mutexes, this lock can be safely locked
   // from within realtime.
-  std::mutex thing_lock_RT_;
+  boost::mutex thing_lock_RT_;
 };
 
-}  // namespace realtime_tools
+} // namespace
 
-#endif  // REALTIME_TOOLS__REALTIME_BOX_H_
+#endif
