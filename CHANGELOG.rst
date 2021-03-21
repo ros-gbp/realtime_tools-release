@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.11.2 (2021-03-21)
+-------------------
+* Remove lunar builds
+* Made copy-constructor const
+* Contributors: Bence Magyar, Matt Reynolds
+
 1.11.1 (2019-02-11)
 -------------------
 * -- No functionality changes
