@@ -1,0 +1,13 @@
+Source: ros-kinetic-realtime-tools
+Section: misc
+Priority: optional
+Maintainer: Bence Magyar <bence.magyar.robotics@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-kinetic-catkin, ros-kinetic-roscpp, ros-kinetic-rospy
+Homepage: http://ros.org/wiki/realtime_tools
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-realtime-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-kinetic-roscpp, ros-kinetic-rospy
+Description: Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
+ The tools currently only provides the realtime publisher, which makes it possible to publish messages to a ROS topic from a realtime thread. We plan to add a basic implementation of a realtime buffer, to make it possible to get data from a (non-realtime) topic callback into the realtime loop. Once the lockfree buffer is created, the realtime publisher will start using it, which will result in major API changes for the realtime publisher (removal of all lock methods).
