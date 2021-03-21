@@ -1,3 +1,26 @@
+## realtime_tools (kinetic) - 1.11.2-1
+
+The packages in the `realtime_tools` repository were released into the `kinetic` distro by running `/home/bence/.local/bin/bloom-release --rosdistro kinetic --track kinetic realtime_tools` on `Sun, 21 Mar 2021 17:53:39 -0000`
+
+The `realtime_tools` package was released.
+
+Version of package(s) in repository `realtime_tools`:
+
+- upstream repository: https://github.com/ros-controls/realtime_tools.git
+- release repository: https://github.com/ros-gbp/realtime_tools-release.git
+- rosdistro version: `1.11.1-0`
+- old version: `1.11.1-0`
+- new version: `1.11.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.10.0`
+- catkin_pkg version: `0.4.23`
+- rosdep version: `0.19.0`
+- rosdistro version: `0.8.3`
+- vcstools version: `0.1.42`
+
+
 ## realtime_tools (foxy) - 2.1.1-1
 
 The packages in the `realtime_tools` repository were released into the `foxy` distro by running `/home/bence/.local/bin/bloom-release --rosdistro foxy --track foxy realtime_tools` on `Sun, 21 Mar 2021 10:48:19 -0000`
