@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Willow Garage, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,53 +27,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Author: Stuart Glaser
+#include <gmock/gmock.h>
+#include <realtime_tools/realtime_buffer.h>
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_H__
-#define REALTIME_TOOLS__REALTIME_BOX_H__
+using realtime_tools::RealtimeBuffer;
 
-#include <mutex>
-#include <string>
-
-namespace realtime_tools
-{
-/*!
-
-  Strongly suggested that you use an std::shared_ptr in this box to
-  guarantee realtime safety.
-
- */
-template<class T>
-class RealtimeBox
+class DefaultConstructable
 {
 public:
-  explicit RealtimeBox(const T & initial = T())
-  : thing_(initial) {}
-
-  void set(const T & value)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    thing_ = value;
-  }
-
-  void get(T & ref)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    ref = thing_;
-  }
-
-private:
-  // The thing that's in the box.
-  T thing_;
-
-  // Protects access to the thing in the box.  This mutex is
-  // guaranteed to be locked for no longer than the duration of the
-  // copy, so as long as the copy is realtime safe and the OS has
-  // priority inheritance for mutexes, this lock can be safely locked
-  // from within realtime.
-  std::mutex thing_lock_RT_;
+  DefaultConstructable()
+  : number_(42) {}
+  ~DefaultConstructable() {}
+  int number_;
 };
 
-}  // namespace realtime_tools
+TEST(RealtimeBuffer, default_construct)
+{
+  RealtimeBuffer<DefaultConstructable> buffer;
+  EXPECT_EQ(42, buffer.readFromRT()->number_);
+}
 
-#endif  // REALTIME_TOOLS__REALTIME_BOX_H_
+TEST(RealtimeBuffer, initial_value)
+{
+  RealtimeBuffer<double> buffer(3.14);
+  EXPECT_DOUBLE_EQ(3.14, *buffer.readFromRT());
+}
+
+TEST(RealtimeBuffer, copy_construct)
+{
+  const RealtimeBuffer<char> buffer('a');
+  RealtimeBuffer<char> buffer_copy(buffer);
+  EXPECT_EQ('a', *buffer_copy.readFromRT());
+}
+
+TEST(RealtimeBuffer, assignment_operator)
+{
+  const RealtimeBuffer<char> buffer('a');
+  RealtimeBuffer<char> buffer2('z');
+
+  EXPECT_EQ('z', *buffer2.readFromRT());
+  buffer2 = buffer;
+  EXPECT_EQ('a', *buffer2.readFromRT());
+}
+
+TEST(RealtimeBuffer, write_read_non_rt)
+{
+  RealtimeBuffer<int> buffer(42);
+
+  buffer.writeFromNonRT(28);
+  EXPECT_EQ(28, *buffer.readFromNonRT());
+}
+
+TEST(RealtimeBuffer, initRT)
+{
+  RealtimeBuffer<int> buffer(42);
+  buffer.initRT(28);
+  EXPECT_EQ(28, *buffer.readFromRT());
+}

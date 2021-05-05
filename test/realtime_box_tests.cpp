@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Willow Garage, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,53 +27,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Author: Stuart Glaser
+#include <gmock/gmock.h>
+#include <realtime_tools/realtime_box.h>
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_H__
-#define REALTIME_TOOLS__REALTIME_BOX_H__
+using realtime_tools::RealtimeBox;
 
-#include <mutex>
-#include <string>
-
-namespace realtime_tools
-{
-/*!
-
-  Strongly suggested that you use an std::shared_ptr in this box to
-  guarantee realtime safety.
-
- */
-template<class T>
-class RealtimeBox
+class DefaultConstructable
 {
 public:
-  explicit RealtimeBox(const T & initial = T())
-  : thing_(initial) {}
-
-  void set(const T & value)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    thing_ = value;
-  }
-
-  void get(T & ref)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    ref = thing_;
-  }
-
-private:
-  // The thing that's in the box.
-  T thing_;
-
-  // Protects access to the thing in the box.  This mutex is
-  // guaranteed to be locked for no longer than the duration of the
-  // copy, so as long as the copy is realtime safe and the OS has
-  // priority inheritance for mutexes, this lock can be safely locked
-  // from within realtime.
-  std::mutex thing_lock_RT_;
+  DefaultConstructable()
+  : number_(42) {}
+  ~DefaultConstructable() {}
+  int number_;
 };
 
-}  // namespace realtime_tools
+TEST(RealtimeBox, default_construct)
+{
+  DefaultConstructable thing;
+  thing.number_ = 5;
 
-#endif  // REALTIME_TOOLS__REALTIME_BOX_H_
+  RealtimeBox<DefaultConstructable> box;
+  box.get(thing);
+
+  EXPECT_EQ(42, thing.number_);
+}
+
+TEST(RealtimeBox, initial_value)
+{
+  RealtimeBox<double> box(3.14);
+  double num = 0.0;
+  box.get(num);
+  EXPECT_DOUBLE_EQ(3.14, num);
+}
+
+TEST(RealtimeBox, set_and_get)
+{
+  RealtimeBox<char> box('a');
+
+  {
+    const char input = 'z';
+    box.set(input);
+  }
+
+  char output = 'a';
+  box.get(output);
+  EXPECT_EQ('z', output);
+}

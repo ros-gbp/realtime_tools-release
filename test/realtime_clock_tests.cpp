@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Willow Garage, Inc.
+ * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,53 +27,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Author: Stuart Glaser
+#include <gmock/gmock.h>
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_H__
-#define REALTIME_TOOLS__REALTIME_BOX_H__
+#include <chrono>
+#include <thread>
 
-#include <mutex>
-#include <string>
+#include "rclcpp/utilities.hpp"
+#include "realtime_tools/realtime_clock.h"
 
-namespace realtime_tools
+using realtime_tools::RealtimeClock;
+
+TEST(RealtimeClock, get_system_time)
 {
-/*!
+  const int ATTEMPTS = 10;
+  const std::chrono::milliseconds DELAY(1);
 
-  Strongly suggested that you use an std::shared_ptr in this box to
-  guarantee realtime safety.
-
- */
-template<class T>
-class RealtimeBox
-{
-public:
-  explicit RealtimeBox(const T & initial = T())
-  : thing_(initial) {}
-
-  void set(const T & value)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    thing_ = value;
+  rclcpp::Clock::SharedPtr clock(new rclcpp::Clock());
+  RealtimeClock rt_clock(clock);
+  // Wait for time to be available
+  rclcpp::Time last_rt_time;
+  for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i) {
+    std::this_thread::sleep_for(DELAY);
+    last_rt_time = rt_clock.now(rclcpp::Time());
   }
+  ASSERT_NE(rclcpp::Time(), last_rt_time);
 
-  void get(T & ref)
-  {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    ref = thing_;
-  }
-
-private:
-  // The thing that's in the box.
-  T thing_;
-
-  // Protects access to the thing in the box.  This mutex is
-  // guaranteed to be locked for no longer than the duration of the
-  // copy, so as long as the copy is realtime safe and the OS has
-  // priority inheritance for mutexes, this lock can be safely locked
-  // from within realtime.
-  std::mutex thing_lock_RT_;
-};
-
-}  // namespace realtime_tools
-
-#endif  // REALTIME_TOOLS__REALTIME_BOX_H_
+  // This test assumes system time will not jump backwards during it
+  EXPECT_GT(rt_clock.now(last_rt_time), last_rt_time);
+}
