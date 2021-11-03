@@ -1,0 +1,12 @@
+Source: ros-galactic-realtime-tools
+Section: misc
+Priority: optional
+Maintainer: Bence Magyar <bence.magyar.robotics@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-galactic-ament-cmake, ros-galactic-ament-cmake-gmock, ros-galactic-ament-lint-auto, ros-galactic-ament-lint-common, ros-galactic-rclcpp, ros-galactic-rclcpp-action, ros-galactic-test-msgs, ros-galactic-ros-workspace
+Homepage: http://ros.org/wiki/realtime_tools
+Standards-Version: 3.9.2
+
+Package: ros-galactic-realtime-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-galactic-ament-cmake, ros-galactic-rclcpp, ros-galactic-rclcpp-action, ros-galactic-ros-workspace
+Description: Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
