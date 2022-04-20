@@ -1,0 +1,12 @@
+Source: ros-humble-realtime-tools
+Section: misc
+Priority: optional
+Maintainer: Bence Magyar <bence.magyar.robotics@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-humble-ament-cmake, ros-humble-ament-cmake-gmock <!nocheck>, ros-humble-ament-lint-auto <!nocheck>, ros-humble-ament-lint-common <!nocheck>, ros-humble-rclcpp, ros-humble-rclcpp-action, ros-humble-rclcpp-action <!nocheck>, ros-humble-test-msgs <!nocheck>, ros-humble-ros-workspace
+Homepage: http://ros.org/wiki/realtime_tools
+Standards-Version: 3.9.2
+
+Package: ros-humble-realtime-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-humble-ament-cmake, ros-humble-rclcpp, ros-humble-rclcpp-action, ros-humble-ros-workspace
+Description: Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
